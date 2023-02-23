@@ -1,12 +1,13 @@
 package com.example.ExcelUploadDownload.dto;
 
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 
 public class ErrorHandler {
 	
-	public static final String INVALID_FILE_UPLOAD="Uploaded file is not PDF";
+	public static final String INVALID_FILE_UPLOAD="Uploaded file is not xlsx";
 	
 	public static final String FILE_UPLOAD="File upload Sucessfully";
 	
@@ -43,11 +44,33 @@ public class ErrorHandler {
 			errorResponse.setError(error);
 			return new ResponseEntity<Object>(errorResponse,httpStatus);
 		}
-		else {
+		else if(httpStatus.value()==406)
+		{
+			errorResponse.setError(error);
+			return new ResponseEntity<Object>(errorResponse,httpStatus);
+		}
+		else
+		{
 			errorResponse.setError(error);
 			return new ResponseEntity<Object>(errorResponse,httpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 	}
+	
+	public static ResponseEntity<?> successResponse(String status,HttpStatus httpStatus)
+	{
+		SuccessResponse successResponse=new SuccessResponse();
+		if(httpStatus.value()==200)
+		{
+			successResponse.setStatus(status);
+			return new ResponseEntity<Object>(successResponse,httpStatus);
+		}
+		else if(httpStatus.value()==202)
+		{
+			successResponse.setStatus(status);
+			return new ResponseEntity<Object>(successResponse,httpStatus);
+		}
+		return new ResponseEntity<Object>(successResponse,HttpStatus.ACCEPTED);
+	}
+	
 
 }
