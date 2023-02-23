@@ -11,38 +11,46 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ExcelUploadDownload.dto.ErrorHandler;
-import com.example.ExcelUploadDownload.servicei.ExcelFileServiceImplementation;
+import com.example.ExcelUploadDownload.service.ExcelFileServiceImplementation;
 
 import jakarta.validation.Valid;
 
 @RestController
-public class FileUploadDownloadController {
+public class ExcelFileUploadDownloadController {
 	
 	@Autowired
 	private ExcelFileServiceImplementation fileService;
 	
 	@PostMapping("/fileUpload")
-	public ResponseEntity<?> fileUpload(@Valid @RequestParam("file") MultipartFile files)
+	public ResponseEntity<?> fileUpload(@Valid @RequestParam("file")MultipartFile  files)
 	{
-		if(files!=null)
+		if(!files.isEmpty()&&files!=null)
 		{
-			fileService.fileUpload(files);
-			return ErrorHandler.response(ErrorHandler.FILE_UPLOAD, HttpStatus.ACCEPTED);
+			if(files.getOriginalFilename().endsWith(".xlsx"))
+			{
+				fileService.fileUpload(files);
+				return ErrorHandler.successResponse(ErrorHandler.FILE_UPLOAD,HttpStatus.ACCEPTED);
+			}
+			else 
+			{
+				return ErrorHandler.response(ErrorHandler.INVALID_FILE_UPLOAD,HttpStatus.NOT_ACCEPTABLE);
+			}
 		}
-		else
-		return ErrorHandler.response(ErrorHandler.FILE_UPLOAD_FAILED,HttpStatus.NOT_FOUND); 
+		return ErrorHandler.response(ErrorHandler.FILE_UPLOAD_FAILED, HttpStatus.NOT_FOUND);
 	}
-	
+		
 	@GetMapping("/downloadFile/{filename}")
 	public ResponseEntity<?> downloadFile(@Valid @PathVariable("filename") String filename)
 	{
-		if(filename!=null)
+		if(!filename.isEmpty()&&filename!=null)
 		{
-			String downloadedFile=fileService.downloadFile(filename);
-			return ResponseEntity.status(HttpStatus.OK)
-					.body(downloadedFile);
+			if(filename.endsWith(".xlsx"))
+			{
+				String downloadedFile=fileService.downloadFile(filename);
+				return ResponseEntity.status(HttpStatus.OK).body(downloadedFile);
+			}
 		}
-		else
+		
 		return ErrorHandler.response(ErrorHandler.INVALID_FILE_UPLOAD, HttpStatus.UNAUTHORIZED);
 	}
 	@GetMapping("/getFileById/{id}")
