@@ -1,8 +1,15 @@
 package com.example.ExcelUploadDownload.controller;
+package com.example.ExcelUploadDownload.controller;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,62 +18,97 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ExcelUploadDownload.dto.ErrorHandler;
+import com.example.ExcelUploadDownload.entity.ExcelFileUpload;
+import com.example.ExcelUploadDownload.repository.ExcelFileRepository;
+import com.example.ExcelUploadDownload.service.ExcelFileService;
 import com.example.ExcelUploadDownload.service.ExcelFileServiceImplementation;
+
 
 import jakarta.validation.Valid;
 
 @RestController
-public class ExcelFileUploadDownloadController {
+@ControllerAdvice
+public class ExcelFileUploadDownloadController 
+{
+	
+	private static final Logger log=LoggerFactory.getLogger(ExcelFileServiceImplementation.class);
 	
 	@Autowired
 	private ExcelFileServiceImplementation fileService;
+	/**
+	 * 
+	 * @param files
+	 * @return
+	 */
 	
 	@PostMapping("/fileUpload")
 	public ResponseEntity<?> fileUpload(@Valid @RequestParam("file")MultipartFile  files)
 	{
+		System.out.println(files.getContentType());
+		String extension=StringUtils.getFilenameExtension(files.getOriginalFilename());
+		System.out.println("extension:"+" "+extension);
 		if(!files.isEmpty()&&files!=null)
 		{
-			if(files.getOriginalFilename().endsWith(".xlsx"))
+			 if(files.getContentType()==extension)
 			{
-				fileService.fileUpload(files);
-				return ErrorHandler.successResponse(ErrorHandler.FILE_UPLOAD,HttpStatus.ACCEPTED);
-			}
-			else 
+				 log.info(extension, "Checking the extension");
+				 System.out.println(files.getContentType()!=extension);
+				 return ErrorHandler.response(ErrorHandler.INVALID_FILE_UPLOAD, HttpStatus.NOT_ACCEPTABLE);
+			}else
 			{
-				return ErrorHandler.response(ErrorHandler.INVALID_FILE_UPLOAD,HttpStatus.NOT_ACCEPTABLE);
+			return fileService.fileUpload(files);
 			}
 		}
-		return ErrorHandler.response(ErrorHandler.FILE_UPLOAD_FAILED, HttpStatus.NOT_FOUND);
+		else
+		return ErrorHandler.response(ErrorHandler.FILE_UPLOAD_FAILED,HttpStatus.NOT_FOUND); 
 	}
-		
-	@GetMapping("/downloadFile/{filename}")
-	public ResponseEntity<?> downloadFile(@Valid @PathVariable("filename") String filename)
+	
+	/**
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	@GetMapping("/downloadFile/")
+	public ResponseEntity<?> downloadFile(@Valid @RequestParam("filename") String filename)
 	{
-		if(!filename.isEmpty()&&filename!=null)
+		String extension=StringUtils.getFilenameExtension(filename);
+		System.out.println(extension);
+		if(!filename.isEmpty() && filename!=null)
 		{
-			if(filename.endsWith(".xlsx"))
-			{
-				String downloadedFile=fileService.downloadFile(filename);
-				return ResponseEntity.status(HttpStatus.OK).body(downloadedFile);
-			}
+		if(filename.contains(extension))
+		{
+			return ExcelFileService.downloadFile(filename);
 		}
-		
-		return ErrorHandler.response(ErrorHandler.INVALID_FILE_UPLOAD, HttpStatus.UNAUTHORIZED);
+		else
+		{
+			return ErrorHandler.response(ErrorHandler.FILE_NOT_FOUND, HttpStatus.NOT_FOUND);
+		}
 	}
-	@GetMapping("/getFileById/{id}")
-	public ResponseEntity<?> getFilesById(@Valid @PathVariable("id") Integer id)
+		return ErrorHandler.response(ErrorHandler.FILE_NOT_ATTACHED, HttpStatus.UNAUTHORIZED);
+}
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	
+	@GetMapping("/getFileById/")
+	public ResponseEntity<?> getFilesById(@Valid @RequestParam("id") Integer id)
 	{
+		Optional<ExcelFileRepository> fileId=excelfileRepository.findById(id);
+		if(fileId.isPresent())
+		{
 		if(id!=null)
 		{
-			ResponseEntity<?> files=fileService.getFilesById(id);
-			return ResponseEntity.status(HttpStatus.OK).body(files);
+			log.info("id id null"+" "+id);
+			return fileService.getFilesById(id);
 		}
-		else 
-		{
-			ErrorHandler.response(ErrorHandler.FILE_ID_EMPTY, HttpStatus.NOT_FOUND);
+		else
+			return ErrorHandler.response(ErrorHandler.FILE_ID_EMPTY, HttpStatus.BAD_REQUEST);
 		}
 		return ErrorHandler.response(ErrorHandler.FILE_NOT_FOUND,HttpStatus.NOT_FOUND);
-		}
+	}
 }
 	
 	
