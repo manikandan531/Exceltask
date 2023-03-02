@@ -15,11 +15,13 @@ public class CustomExceptionHandler
 {
 	
 	
-	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	public ResponseEntity<?> handleMaxSizeError()
-	{
-		return ErrorHandler.response(ErrorHandler.FILE_SIZE_EXCEEDS, HttpStatus.BAD_REQUEST);
-	}
+	
+	  @ExceptionHandler(MaxUploadSizeExceededException.class)
+	  public ResponseEntity<?> handleMaxSizeError() 
+	  { 
+		  return ErrorHandler.response(ErrorHandler.FILE_SIZE_EXCEEDS, HttpStatus.BAD_REQUEST); 
+	  }
+	 
 	
 	@ExceptionHandler(MissingServletRequestParameterException.class)
 	public ResponseEntity<?> requestedIdNotFound()
@@ -31,5 +33,11 @@ public class CustomExceptionHandler
 	public ResponseEntity<?> requestFilenameNotFound()
 	{
 		return ErrorHandler.response(ErrorHandler.FILE_NAME_EMPTY, HttpStatus.NOT_FOUND);
+	}
+	
+	@ExceptionHandler(NullPointerException.class)
+	public ResponseEntity<?> customeNullPointer()
+	{
+		return ErrorHandler.response(ErrorHandler.FILE_NOT_ATTACHED, HttpStatus.BAD_REQUEST); 
 	}
 }
