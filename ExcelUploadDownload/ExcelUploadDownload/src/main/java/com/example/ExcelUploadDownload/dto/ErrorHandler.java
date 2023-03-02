@@ -11,7 +11,7 @@ public class ErrorHandler {
 	public static final String FILE_UPLOAD="File upload Sucessfully";
 	
 	
-	public static final String FILE_SIZE_EXCEEDS="File Size Exceeds, Please Upload file within 40MB";
+	public static final String FILE_SIZE_EXCEEDS="File Size Exceeds, Please Upload file within 30MB";
 
 	
 	public static final String FILE_UPLOAD_FAILED="File upload failed,File not Found";
@@ -20,7 +20,7 @@ public class ErrorHandler {
 	
 	public static final String BYTE_CONVERSION_FAILED="Internal conversion failed";
 	
-	public static final String FILE_NOT_ATTACHED="No Filename Attached";
+	public static final String FILE_NOT_ATTACHED="file not exist";
 	
 	public static final String FILE_NOT_FOUND="File not found in Database";
 	
@@ -32,6 +32,7 @@ public class ErrorHandler {
 	
 	public static final String FILE_NAME_EMPTY="Required field Key is Empty or Incorrect, Please recheck!";
 	
+	public static final String No_File="No file attached kindly attach the file";
 	
 	public static ResponseEntity<?> response(String error, HttpStatus httpStatus)
 	{
